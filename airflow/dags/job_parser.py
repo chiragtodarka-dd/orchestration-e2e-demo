@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Type
 import yaml
 from airflow import DAG
 from airflow.models import BaseOperator
-from airflow.operator.postgresqloperator import PostgreSQLOperator
+from airflow.operator.PostgresSQLFunction import PostgreSQLFunction
 
 from datetime import datetime, timedelta
 import logging
@@ -106,7 +106,7 @@ class JobParser:
             dag_id=config['job_id'],
             description=config.get('description', ''),
             schedule=config['schedule'],
-            start_date=days_ago(1),
+            start_date=days_ago(100),
             catchup=config.get('catchup', False),
             tags=config.get('tags', []),
         )
@@ -114,20 +114,20 @@ class JobParser:
         tasks = {}
         for task_id, task_config in config.get('tasks', {}).items():
             try:
-                operator_class = self.get_operator_class(task_config['operator'])
+                operator_class = self.get_operator_class(task_config['function'])
                 
-                # Handle PostgreSQLOperator specially
-                if operator_class == PostgreSQLOperator:
+                # Handle PostgreSQLFunction specially
+                if operator_class == PostgreSQLFunction:
                     # Extract required parameters
                     kwargs = task_config.get('kwargs', {})
                     sql_file_path = kwargs.pop('sql_file_path', None)
                     if not sql_file_path:
-                        raise ValueError(f"PostgreSQLOperator requires 'sql_file_path' in kwargs for task '{task_id}'")
+                        raise ValueError(f"PostgreSQLFunction requires 'sql_file_path' in kwargs for task '{task_id}'")
                     
                     # Get secret_key from task_config (not from kwargs)
                     secret_key = task_config.get('secret_key')
                     if not secret_key:
-                        raise ValueError(f"PostgreSQLOperator requires 'secret_key' for task '{task_id}'")
+                        raise ValueError(f"PostgreSQLFunction requires 'secret_key' for task '{task_id}'")
                     
                     # Create task with required parameters
                     task = operator_class(

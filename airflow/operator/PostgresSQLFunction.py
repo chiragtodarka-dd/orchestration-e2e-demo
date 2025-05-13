@@ -7,9 +7,9 @@ from datetime import datetime
 
 from airflow.models import BaseOperator
 from orchestration.function.function_abstract import ExecutionContext
-from orchestration.function.postgres_sql_function import PostgreSQLFunction
+from orchestration.function.postgres_sql_function import PostgreSQLFunction as PostgresSQLFunctionImplementation
 
-class PostgreSQLOperator(BaseOperator):
+class PostgreSQLFunction(BaseOperator):
     """
     Airflow operator for PostgreSQLFunction.
     This operator is auto-generated.
@@ -57,7 +57,7 @@ class PostgreSQLOperator(BaseOperator):
         """
         Execute the function with the given Airflow context.
         """
-        print(f"Executing operator PostgreSQLOperator for task {self.task_id}")
+        print(f"Executing operator PostgreSQLFunction for task {self.task_id}")
         
         # Get execution date from context
         execution_date = context.get('execution_date', context.get('data_interval_start'))
@@ -77,7 +77,7 @@ class PostgreSQLOperator(BaseOperator):
         )
         
         print(f"Initializing function PostgreSQLFunction with params: {self.function_params} and secret_key: {self.secret_key}")
-        function_instance = PostgreSQLFunction(
+        function_instance = PostgresSQLFunctionImplementation(
             context=exec_context,
             **self.function_params
         )

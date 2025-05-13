@@ -1,11 +1,11 @@
 -- Create sink table if it doesn't exist
-CREATE TABLE IF NOT EXISTS sink (
+DROP TABLE IF EXISTS sink;
+CREATE TABLE sink (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
-
 -- Insert data from source to sink
 INSERT INTO sink (name, created_at, updated_at)
 SELECT 
@@ -13,7 +13,7 @@ SELECT
     created_at,
     updated_at
 FROM source
-WHERE DATE(created_at) = %(execution_date)s
+WHERE DATE(created_at) <= %(execution_date)s
 ON CONFLICT (id) DO UPDATE
 SET 
     name = EXCLUDED.name,

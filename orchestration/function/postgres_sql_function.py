@@ -95,7 +95,7 @@ class PostgreSQLFunction(Function):
         if not self.conn or not self.cursor or not self.sql_to_execute:
             raise RuntimeError("Connection or SQL not established/loaded. Call pre_execute first.")
         
-        print(f"Executing SQL for function {self.__class__.__name__}:\n{self.sql_to_execute[:200]}...")
+        print(f"Executing SQL for function {self.__class__.__name__}:\n{self.sql_to_execute}...")
         print(f"With parameters: {self.params}")
         try:
             self.cursor.execute(self.sql_to_execute, self.params)
