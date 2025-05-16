@@ -65,7 +65,7 @@ class JobParser:
                 # Module path for import should be relative to a PYTHONPATH entry.
                 # In Docker, /opt/airflow is on PYTHONPATH, and operators are in /opt/airflow/airflow/operator
                 # So, the import path is airflow.operator.module_name
-                full_module_path = f'airflow.operator.{module_name}'
+                full_module_path = f'airflow_artifacts.operator.{module_name}'
                 module = importlib.import_module(full_module_path)
                 
                 for name, obj in inspect.getmembers(module):
