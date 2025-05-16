@@ -35,11 +35,11 @@ env/
 .DS_Store
 
 # Airflow
-# airflow-artifacts/secret/
-airflow-artifacts/logs/
-airflow-artifacts/plugins/
-airflow-artifacts/dags/__pycache__/
-airflow-artifacts/dags/*.pyc
+# airflow_artifacts/secret/
+airflow_artifacts/logs/
+airflow_artifacts/plugins/
+airflow_artifacts/dags/__pycache__/
+airflow_artifacts/dags/*.pyc
 
 # Credentials and Secrets
 *.env
