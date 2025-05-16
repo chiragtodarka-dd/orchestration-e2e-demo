@@ -34,7 +34,7 @@ class JobParser:
         # Determine project root and key directories
         self.project_root = '/opt/airflow/data'
         self.job_dir = os.path.join(self.project_root, "orchestration", "jobs")
-        self.operator_dir = os.path.join(self.project_root, "airflow", "operator")
+        self.operator_dir = os.path.join(self.project_root, "airflow_artifacts", "operator")
         
         print(f"JobParser Initialized:")
         print(f"  Project Root: {self.project_root}")
@@ -169,7 +169,7 @@ class JobParser:
                 tasks[task_id] = task
                 
             except Exception as e:
-                print(f"ERROR creating task '{task_id}' for DAG '{config['dag_id']}': {e}")
+                print(f"ERROR creating task '{task_id}' for DAG '{config['job_id']}': {e}")
                 # Optionally, re-raise or handle gracefully so other tasks/DAGs might load
                 # For now, let it propagate if it's critical for this DAG
                 raise
@@ -178,7 +178,7 @@ class JobParser:
             if dep['source'] in tasks and dep['target'] in tasks:
                 tasks[dep['source']] >> tasks[dep['target']]
             else:
-                print(f"WARNING: Invalid dependency for DAG '{config['dag_id']}': {dep['source']} or {dep['target']} not found.")
+                print(f"WARNING: Invalid dependency for DAG '{config['job_id']}': {dep['source']} or {dep['target']} not found.")
         return dag
     
     def create_dag_from_yaml(self, yaml_file_path: str) -> DAG:
