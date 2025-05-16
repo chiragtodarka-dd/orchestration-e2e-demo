@@ -31,7 +31,7 @@ class JobParser:
                                    If None, will try to detect automatically.
         """
         # Determine project root and key directories
-        self.project_root = '/opt/airflow/data'
+        self.project_root = '/opt/airflow/data/root'  # Use the symlink created by git-sync
         self.job_dir = os.path.join(self.project_root, "orchestration", "jobs")
         self.operator_dir = os.path.join(self.project_root, "airflow_artifacts", "operator")
         
@@ -40,9 +40,9 @@ class JobParser:
         print(f"  Job (YAML) Directory: {self.job_dir}")
         print(f"  Operator Directory: {self.operator_dir}")
         
-        # Add the project root to Python path
-        if self.project_root not in os.environ.get('PYTHONPATH', '').split(':'):
-            os.environ['PYTHONPATH'] = f"{self.project_root}:{os.environ.get('PYTHONPATH', '')}"
+        # Add the project root to sys.path if not already there
+        if self.project_root not in os.sys.path:
+            os.sys.path.append(self.project_root)
         
         self.operator_map = self._load_operators()
         

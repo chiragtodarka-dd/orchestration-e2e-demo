@@ -1,8 +1,11 @@
-# dcp-e2e-demo
+# orchestration-e2e-demo
+
+source venv_py312/bin/activate
+
 
 source venv_py312/bin/activate && pip install -r orchestration/function/requirements.txt
 
-source venv_py312/bin/activate && PYTHONPATH=$(pwd) python airflow/interface/function/function_to_operator_generator.py /Users/chirag.todarka/Projects/dcp-e2e-demo/orchestration/function/snowflake_sql_function.py /Users/chirag.todarka/Projects/dcp-e2e-demo/airflow/operator
+source venv_py312/bin/activate && PYTHONPATH=$(pwd) python airflow/interface/function/function_to_operator_generator.py /Users/chirag.todarka/Projects/orchestration-e2e-demo/orchestration/function/snowflake_sql_function.py /Users/chirag.todarka/Projects/orchestration-e2e-demo/airflow/operator
 
 
 airflow variables set postgres_host your_host
@@ -43,7 +46,27 @@ docker compose up -d
 
 
 
-docker compose down --remove-orphans && docker compose up -d && sleep 1 && docker compose exec postgres psql -U airflow -d airflow -c "\dt" && docker compose logs -f airflow-standalone
+docker compose down --remove-orphans && docker compose up -d && sleep 1 && docker compose exec postgres psql -U airflow -d airflow -c "\dt"
+docker compose logs -f airflow-standalone
+
+CREATE TABLE source (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE sink (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    processed_at TIMESTAMP
+);
+
+INSERT INTO source (name, created_at, updated_at)
+VALUES ('my_name1', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+commit;
 
 You should see the print statements from job_parser.py indicating the paths it's using and the DAGs it's loading.
 Look for lines like "JobParser Initialized:", "Scanning for YAML DAGs in: /opt/airflow/dags", and "Successfully loaded DAG: ...".

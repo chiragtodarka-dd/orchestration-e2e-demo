@@ -3,7 +3,7 @@ import psycopg2
 import os
 from psycopg2.extras import RealDictCursor
 
-from orchestration.function.function_abstract import Function, ExecutionContext # Adjusted import path
+from orchestration.function.function_abstract import Function, ExecutionContext
 
 class PostgreSQLFunction(Function):
     """
@@ -47,24 +47,8 @@ class PostgreSQLFunction(Function):
     def _read_sql_file(self) -> str:
         """Reads SQL content from the file specified by sql_file_path."""
         # Construct absolute path if sql_file_path is relative to project root or a specific dir
-        # Assuming sql_file_path might be relative to project root for now.
-        # If job definitions are in orchestration/job and SQL in orchestration/sql,
-        # and dag_factory/job_parser is running from airflow/dags or airflow/interface
-        # we need a robust way to resolve this path. For now, let's assume it can be resolved
-        # or it's an absolute path.
-        # For simplicity, let's assume it's relative to where Airflow DAGs are processed from (project root usually)
-        # A more robust solution would involve passing project_root or making paths absolute in YAML.
         sql_file = self.config['sql_file_path']
-        sql_file = os.path.join('/opt/airflow/data', sql_file)
-        
-        if not os.path.isabs(sql_file):
-             # This assumes the script/DAG is run from project root or PYTHONPATH includes it.
-             # A common pattern is to define a base path in Airflow variables or make paths in YAML absolute.
-             # For this exercise, we will assume the path is resolvable from the current working directory
-             # or is made absolute before being passed to the operator.
-             # For the generator, this path is just a string value.
-             # When the DAG runs, this path needs to be accessible by the Airflow worker.
-            pass # Keep it as is, expect it to be resolvable by the worker
+        sql_file = os.path.join('/opt/airflow/data/root', sql_file)  # Use the symlink path
         
         if not os.path.exists(sql_file):
             raise FileNotFoundError(f"SQL file not found: {sql_file}")
