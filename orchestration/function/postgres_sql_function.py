@@ -55,6 +55,8 @@ class PostgreSQLFunction(Function):
         # For simplicity, let's assume it's relative to where Airflow DAGs are processed from (project root usually)
         # A more robust solution would involve passing project_root or making paths absolute in YAML.
         sql_file = self.config['sql_file_path']
+        sql_file = os.path.join('/opt/airflow/data', sql_file)
+        
         if not os.path.isabs(sql_file):
              # This assumes the script/DAG is run from project root or PYTHONPATH includes it.
              # A common pattern is to define a base path in Airflow variables or make paths in YAML absolute.

@@ -61,6 +61,7 @@ class ExecutionContext:
         # and secrets are in airflow/secret/
         secret_path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'airflow_artifacts',
             'secret',
             f"{base_secret_name}.json"
         )
