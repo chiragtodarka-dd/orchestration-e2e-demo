@@ -1,3 +1,13 @@
+-- Create source table if it doesn't exist
+DROP TABLE IF EXISTS source;
+CREATE TABLE source (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+INSERT INTO source (name, created_at, updated_at) VALUES ('source', NOW(), NOW());
+
 -- Create sink table if it doesn't exist
 DROP TABLE IF EXISTS sink;
 CREATE TABLE sink (

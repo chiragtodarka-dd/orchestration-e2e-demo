@@ -32,8 +32,8 @@ class JobParser:
                                    If None, will try to detect automatically.
         """
         # Determine project root and key directories
-        self.project_root = '/opt/airflow'
-        self.job_dir = os.path.join(self.project_root, "orchestration", "job")
+        self.project_root = '/opt/airflow/data'
+        self.job_dir = os.path.join(self.project_root, "orchestration", "jobs")
         self.operator_dir = os.path.join(self.project_root, "airflow", "operator")
         
         print(f"JobParser Initialized:")
