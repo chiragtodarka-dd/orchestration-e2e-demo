@@ -9,7 +9,6 @@ from typing import Dict, Any, List, Type
 import yaml
 from airflow import DAG
 from airflow.models import BaseOperator
-# from airflow_artifacts.operator.PostgresSQLFunction import PostgreSQLFunction
 
 from datetime import datetime, timedelta
 import logging
@@ -41,6 +40,10 @@ class JobParser:
         print(f"  Job (YAML) Directory: {self.job_dir}")
         print(f"  Operator Directory: {self.operator_dir}")
         
+        # Add the project root to Python path
+        if self.project_root not in os.environ.get('PYTHONPATH', '').split(':'):
+            os.environ['PYTHONPATH'] = f"{self.project_root}:{os.environ.get('PYTHONPATH', '')}"
+        
         self.operator_map = self._load_operators()
         
         if self.operator_map:
@@ -62,20 +65,31 @@ class JobParser:
         for file_name in operator_files:
             module_name = file_name[:-3]
             try:
-                # Module path for import should be relative to a PYTHONPATH entry.
-                # In Docker, /opt/airflow is on PYTHONPATH, and operators are in /opt/airflow/airflow/operator
-                # So, the import path is airflow.operator.module_name
+                # Since we're in /opt/airflow/data/airflow_artifacts/dags
+                # and operators are in /opt/airflow/data/airflow_artifacts/operator
+                # we need to go up one level to import
                 full_module_path = f'airflow_artifacts.operator.{module_name}'
-                module = importlib.import_module(full_module_path)
-                
-                for name, obj in inspect.getmembers(module):
-                    if (inspect.isclass(obj) and 
-                        issubclass(obj, BaseOperator) and 
-                        obj != BaseOperator):
-                        operator_map[name] = obj
-                        print(f"    Loaded operator: {name} from {full_module_path}")
-            except ImportError as e:
-                print(f"    WARNING: Failed to import operator module {full_module_path} from {file_name}: {str(e)}")
+                try:
+                    # Add the parent directory to sys.path if not already there
+                    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+                    if parent_dir not in os.sys.path:
+                        os.sys.path.append(parent_dir)
+                    
+                    module = importlib.import_module(full_module_path)
+                    
+                    for name, obj in inspect.getmembers(module):
+                        if (inspect.isclass(obj) and 
+                            issubclass(obj, BaseOperator) and 
+                            obj != BaseOperator):
+                            operator_map[name] = obj
+                            print(f"    Loaded operator: {name} from {full_module_path}")
+                except ImportError as e:
+                    print(f"    WARNING: Failed to import operator module {full_module_path} from {file_name}: {str(e)}")
+                    print(f"    PYTHONPATH: {os.environ.get('PYTHONPATH', 'Not set')}")
+                    print(f"    Current directory: {os.getcwd()}")
+                    print(f"    sys.path: {os.sys.path}")
+                except Exception as e:
+                    print(f"    WARNING: Failed to load operator from {file_name} (module: {full_module_path}): {str(e)}")
             except Exception as e:
                 print(f"    WARNING: Failed to load operator from {file_name} (module: {full_module_path}): {str(e)}")
         return operator_map
