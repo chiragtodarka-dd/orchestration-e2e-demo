@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Type
 import yaml
 from airflow import DAG
 from airflow.models import BaseOperator
-from airflow_artifacts.operator.PostgresSQLFunction import PostgreSQLFunction
+# from airflow_artifacts.operator.PostgresSQLFunction import PostgreSQLFunction
 
 from datetime import datetime, timedelta
 import logging
@@ -115,36 +115,56 @@ class JobParser:
         for task_id, task_config in config.get('tasks', {}).items():
             try:
                 operator_class = self.get_operator_class(task_config['function'])
+
+                kwargs = task_config.get('kwargs', {})
+                sql_file_path = kwargs.pop('sql_file_path', None)
+                if not sql_file_path:
+                    raise ValueError(f"PostgreSQLFunction requires 'sql_file_path' in kwargs for task '{task_id}'")
                 
-                # Handle PostgreSQLFunction specially
-                if operator_class == PostgreSQLFunction:
-                    # Extract required parameters
-                    kwargs = task_config.get('kwargs', {})
-                    sql_file_path = kwargs.pop('sql_file_path', None)
-                    if not sql_file_path:
-                        raise ValueError(f"PostgreSQLFunction requires 'sql_file_path' in kwargs for task '{task_id}'")
+                # Get secret_key from task_config (not from kwargs)
+                secret_key = task_config.get('secret_key')
+                if not secret_key:
+                    raise ValueError(f"PostgreSQLFunction requires 'secret_key' for task '{task_id}'")
+                
+                # Create task with required parameters
+                task = operator_class(
+                    task_id=task_config['task_id'],
+                    sql_file_path=sql_file_path,
+                    use_dict_cursor=True,  # Default value from the operator
+                    kwargs=kwargs,  # Pass remaining kwargs as a dictionary
+                    secret_key=secret_key,  # Pass secret_key as a top-level parameter
+                    dag=dag  # Pass DAG to BaseOperator
+                )
+                
+                # # Handle PostgreSQLFunction specially
+                # if operator_class == PostgreSQLFunction:
+                #     # Extract required parameters
+                #     kwargs = task_config.get('kwargs', {})
+                #     sql_file_path = kwargs.pop('sql_file_path', None)
+                #     if not sql_file_path:
+                #         raise ValueError(f"PostgreSQLFunction requires 'sql_file_path' in kwargs for task '{task_id}'")
                     
-                    # Get secret_key from task_config (not from kwargs)
-                    secret_key = task_config.get('secret_key')
-                    if not secret_key:
-                        raise ValueError(f"PostgreSQLFunction requires 'secret_key' for task '{task_id}'")
+                #     # Get secret_key from task_config (not from kwargs)
+                #     secret_key = task_config.get('secret_key')
+                #     if not secret_key:
+                #         raise ValueError(f"PostgreSQLFunction requires 'secret_key' for task '{task_id}'")
                     
-                    # Create task with required parameters
-                    task = operator_class(
-                        task_id=task_config['task_id'],
-                        sql_file_path=sql_file_path,
-                        use_dict_cursor=True,  # Default value from the operator
-                        kwargs=kwargs,  # Pass remaining kwargs as a dictionary
-                        secret_key=secret_key,  # Pass secret_key as a top-level parameter
-                        dag=dag  # Pass DAG to BaseOperator
-                    )
-                else:
-                    # For other operators, pass kwargs directly
-                    task = operator_class(
-                        task_id=task_config['task_id'],
-                        dag=dag,  # Pass DAG directly
-                        **task_config.get('kwargs', {})
-                    )
+                #     # Create task with required parameters
+                #     task = operator_class(
+                #         task_id=task_config['task_id'],
+                #         sql_file_path=sql_file_path,
+                #         use_dict_cursor=True,  # Default value from the operator
+                #         kwargs=kwargs,  # Pass remaining kwargs as a dictionary
+                #         secret_key=secret_key,  # Pass secret_key as a top-level parameter
+                #         dag=dag  # Pass DAG to BaseOperator
+                #     )
+                # else:
+                #     # For other operators, pass kwargs directly
+                #     task = operator_class(
+                #         task_id=task_config['task_id'],
+                #         dag=dag,  # Pass DAG directly
+                #         **task_config.get('kwargs', {})
+                #     )
                 
                 tasks[task_id] = task
                 
