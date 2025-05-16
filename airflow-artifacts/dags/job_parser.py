@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Type
 import yaml
 from airflow import DAG
 from airflow.models import BaseOperator
-from airflow.operator.PostgresSQLFunction import PostgreSQLFunction
+from airflow-artifacts.operator.PostgresSQLFunction import PostgreSQLFunction
 
 from datetime import datetime, timedelta
 import logging
