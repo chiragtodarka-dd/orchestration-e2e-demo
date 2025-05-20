@@ -1,0 +1,17 @@
+catchup: false
+description: A derived dataset job to materialize 'sink' table from 'source' table
+name: derived_dataset_materialize_sink_19
+schedule: '@daily'
+start_date: "2024-01-01"
+tags:
+    - derived_dataset
+    - etl
+tasks:
+    postgres_transformation:
+        function: PostgreSQLFunction
+        kwargs:
+            custom_param_for_function: custom_value
+            sql_file_path: orchestration/sqls/transform_source_to_sink.sql
+            use_dict_cursor: true
+        secret_key: postgres_credentials
+        task_id: postgres_transformation_task
